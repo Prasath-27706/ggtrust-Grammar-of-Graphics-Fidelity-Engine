@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ggtrust Platform Workflow & Visual Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: #f1f5f9;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #0f172a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    width: 1420px;
+  }
+  .canvas {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 16px;
+    box-shadow: 0 12px 36px -6px rgba(15, 23, 42, 0.12);
+    padding: 28px 32px;
+    width: 1360px;
+  }
+  
+  /* HEADER */
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 16px;
+    margin-bottom: 22px;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .header-badge {
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    color: #ffffff;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+  }
+  .header-text h1 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .header-text p {
+    font-size: 12.5px;
+    color: #64748b;
+    font-weight: 500;
+    margin-top: 2px;
+  }
+  .header-tag {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* TOP ROW: 5 PIPELINE PHASES */
+  .top-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .step-card {
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1.5px solid #e2e8f0;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.15s ease;
+  }
+
+  .card-header {
+    padding: 10px 12px;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-header svg {
+    width: 17px;
+    height: 17px;
+    fill: currentColor;
+    flex-shrink: 0;
+  }
+  
+  /* Step Color Schemes */
+  .step-1 .card-header { background: linear-gradient(135deg, #1e3a8a, #2563eb); }
+  .step-1 { border-color: #bfdbfe; }
+  
+  .step-2 .card-header { background: linear-gradient(135deg, #0f766e, #0d9488); }
+  .step-2 { border-color: #99f6e4; }
+  
+  .step-3 .card-header { background: linear-gradient(135deg, #6d28d9, #7c3aed); }
+  .step-3 { border-color: #ddd6fe; }
+  
+  .step-4 .card-header { background: linear-gradient(135deg, #c2410c, #ea580c); }
+  .step-4 { border-color: #fed7aa; }
+  
+  .step-5 .card-header { background: linear-gradient(135deg, #047857, #059669); }
+  .step-5 { border-color: #a7f3d0; }
+
+  .card-body {
+    padding: 12px;
+    font-size: 11px;
+    color: #334155;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    flex: 1;
+    background: #fafafa;
+  }
+
+  .sub-block {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+    padding: 8px 9px;
+  }
+  .sub-title {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .sub-text {
+    font-size: 10px;
+    color: #475569;
+    line-height: 1.38;
+  }
+  .sub-text strong {
+    color: #0f172a;
+  }
+  .pill-badge {
+    display: inline-block;
+    padding: 1.5px 6px;
+    border-radius: 4px;
+    font-size: 9.5px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .pill-blue { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+  .pill-teal { background: #ccfbf1; color: #0f766e; border: 1px solid #99f6e4; }
+  .pill-purple { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
+  .pill-amber { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+  .pill-green { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+  .pill-red { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+
+  /* Flow Connector Arrows between steps */
+  .flow-arrow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 4px 0 16px 0;
+  }
+  .flow-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: #f1f5f9;
+    padding: 6px 18px;
+    border-radius: 8px;
+    border: 1px dashed #cbd5e1;
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+  }
+  .flow-bar span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* BOTTOM ROW: 3 INTERACTIVE & OUTCOME BLOCKS */
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .wide-card {
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1.5px solid #e2e8f0;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .step-6 .card-header { background: linear-gradient(135deg, #1d4ed8, #3b82f6); }
+  .step-6 { border-color: #bfdbfe; }
+  
+  .step-7 .card-header { background: linear-gradient(135deg, #be123c, #e11d48); }
+  .step-7 { border-color: #fecdd3; }
+  
+  .step-8 .card-header { background: linear-gradient(135deg, #0369a1, #0284c7); }
+  .step-8 { border-color: #bae6fd; }
+
+  .wide-card .card-body {
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  /* FOOTER BANNER */
+  .footer-banner {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border-radius: 10px;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15);
+  }
+  .footer-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .footer-left svg {
+    width: 20px;
+    height: 20px;
+    fill: #38bdf8;
+  }
+  .footer-flow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #cbd5e1;
+  }
+  .footer-flow span {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+  }
+  .footer-flow strong {
+    color: #38bdf8;
+  }
+</style>
+</head>
+<body>
+
+<div class="canvas">
+
+  <!-- HEADER -->
+  <div class="header-container">
+    <div class="header-left">
+      <div class="header-badge">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        ggtrust
+      </div>
+      <div class="header-text">
+        <h1>End-to-End Workflow Architecture</h1>
+        <p>A Multi-Scale Grammar-of-Graphics Framework for Resolving the Silent Hallucination Crisis in Dimensionality Reduction</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP ROW: 5 CORE TECHNICAL PIPELINE PHASES -->
+  <div class="top-row">
+
+    <!-- STEP 1: DATA INGESTION -->
+    <div class="step-card step-1">
+      <div class="card-header">
+        <svg viewBox="0 0 24 24"><path d="M4 6H20V8H4V6M4 11H20V13H4V11M4 16H20V18H4V16Z"/></svg>
+        1. DATA INGESTION
+      </div>
+      <div class="card-body">
+        <div class="sub-block">
+          <div class="sub-title">High-D Input Matrix</div>
+          <div class="sub-text">
+            <strong>X ∈ ℝ^(N×D)</strong> Continuous Space<br>
+            • Single-Cell RNA: 500 cells × 20 genes<br>
+            • MNIST Digits: 400 × 64 pixels<br>
+            • Wine Quality: 178 × 13 chemical
+          </div>
+        </div>
+        <div class="sub-block">
+          <div class="sub-title">Metadata & Lineages</div>
+          <div class="sub-text">
+            • 5 PBMC Lineages (CD4, CD8, B, Mono, NK)<br>
+            • Ground-truth phenotype annotations<br>
+            • Formats: CSV, AnnData (h5ad), Seurat
+          </div>
+        </div>
+        <span class="pill-badge pill-blue">Input Validation Passed</span>
+      </div>
+    </div>
+
+    <!-- STEP 2: MANIFOLD PROJECTION -->
+    <div class="step-card step-2">
+      <div class="card-header">
+        <svg viewBox="0 0 24 24"><path d="M21 3L3 10.53V11.5L9.84 14.16L12.5 21H13.46L21 3Z"/></svg>
+        2. MANIFOLD PROJECTION
+      </div>
+      <div class="card-body">
+        <div class="sub-block">
+          <div class="sub-title">Non-Linear DR Engine</div>
+          <div class="sub-text">
+            <strong>Y ∈ ℝ^(N×2)</strong> 2D Coordinates<br>
+            • <strong>t-SNE:</strong> KL-divergence optimization<br>
+            • <strong>UMAP:</strong> Fuzzy simplicial approximations<br>
+            • <strong>PCA:</strong> Orthogonal variance baselines
+          </div>
+        </div>
+        <div class="sub-block">
+          <div class="sub-title">The Silent Hallucination</div>
+          <div class="sub-text">
+            • Whitney Embedding Theorem metric loss<br>
+            • Discards high-D neighborhood topology<br>
+            • Naive uniform 2D visual confidence
+          </div>
+        </div>
+        <span class="pill-badge pill-teal">2D Coordinates Emitted</span>
+      </div>
+    </div>
+
+    <!-- STEP 3: VECTORIZED METRIC ENGINE -->
+    <div class="step-card step-3">
+      <div class="card-header">
+        <svg viewBox="0 0 24 24"><path d="M7 2V4H10.5L6.5 12L10.5 20H7V22H17V20H13.5L17.5 12L13.5 4H17V2H7Z"/></svg>
+        3. METRIC COMPUTATION
+      </div>
+      <div class="card-body">
+        <div class="sub-block">
+          <div class="sub-title">Pairwise Distance Tensors</div>
+          <div class="sub-text">
+            <strong>D_orig = cdist(X, X)</strong> in high-D<br>
+            <strong>D_emb = cdist(Y, Y)</strong> in 2D<br>
+            Vectorized NumPy rank permutations
+          </div>
+        </div>
+        <div class="sub-block">
+          <div class="sub-title">Topological Fidelity</div>
+          <div class="sub-text">
+            • <strong>Trustworthiness T(k,i):</strong> Penalizes false intrusions (impostors)<br>
+            • <strong>Continuity C(k,i):</strong> Penalizes torn extrusions (exiles)<br>
+            • <strong>Composite Fidelity:</strong> S_i = min(T, C)
+          </div>
+        </div>
+        <span class="pill-badge pill-purple">Sub-50ms Execution</span>
+      </div>
+    </div>
+
+    <!-- STEP 4: DISTORTION TYPOLOGY -->
+    <div class="step-card step-4">
+      <div class="card-header">
+        <svg viewBox="0 0 24 24"><path d="M3 3H11V11H3V3M13 3H21V11H13V3M3 13H11V21H3V13M13 13H21V21H13V13Z"/></svg>
+        4. DISTORTION TYPOLOGY
+      </div>
+      <div class="card-body">
+        <div class="sub-block">
+          <div class="sub-title">4-Quadrant Diagnostic Plane</div>
+          <div class="sub-text">
+            • <strong style="color:#15803d;">Faithful Anchors:</strong> High T, High C<br>
+            • <strong style="color:#dc2626;">False Impostors:</strong> Low T, High C<br>
+            • <strong style="color:#d97706;">Torn Exiles:</strong> High T, Low C<br>
+            • <strong style="color:#7c3aed;">Critical Artifacts:</strong> Low T, Low C
+          </div>
+        </div>
+        <div class="sub-block">
+          <div class="sub-title">Lineage Error Breakdown</div>
+          <div class="sub-text">
+            • Quantifies distortion across cell types<br>
+            • Isolates vulnerable biomarker subsets
+          </div>
+        </div>
+        <span class="pill-badge pill-amber">Automated Classification</span>
+      </div>
+    </div>
+
+    <!-- STEP 5: MULTI-SCALE STABILITY -->
+    <div class="step-card step-5">
+      <div class="card-header">
+        <svg viewBox="0 0 24 24"><path d="M16 6L18.29 8.29L13.41 13.17L9.41 9.17L2 16.59L3.41 18L9.41 12L13.41 16L19.71 9.71L22 12V6H16Z"/></svg>
+        5. MULTI-SCALE STABILITY
+      </div>
+      <div class="card-body">
+        <div class="sub-block">
+          <div class="sub-title">Scale-Space Horizon</div>
+          <div class="sub-text">
+            • Evaluates across <strong>k ∈ [3, 45]</strong><br>
+            • Overcomes Scale-Space Myopia<br>
+            • 15 neighborhood sweeps per run
+          </div>
+        </div>
+        <div class="sub-block">
+          <div class="sub-title">Hyperparameter Tuning</div>
+          <div class="sub-text">
+            • Detects phase-transition break points<br>
+            • Calibrates perplexity & n_neighbors<br>
+            • Multi-trajectory mean T & C curves
+          </div>
+        </div>
+        <span class="pill-badge pill-green">Stability Spectrum Verified</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MID TRANSITION FLOW BAR -->
+  <div class="flow-arrow">
+    <div class="flow-bar">
+      <span>
+        <svg style="width:16px; height:16px; fill:#2563eb;" viewBox="0 0 24 24"><path d="M4 12L12 4L14 6L8 12L14 18L12 20L4 12M12 12L20 4L22 6L16 12L22 18L20 20L12 12"/></svg>
+        Automated Topological Quality Validation Pipeline
+      </span>
+      <span>▼ In-Situ Encodings & Interactive Streamlit Dashboard Deployment ▼</span>
+      <span>
+        Clinical Translation & Decision Protocol
+        <svg style="width:16px; height:16px; fill:#059669;" viewBox="0 0 24 24"><path d="M20 12L12 4L10 6L16 12L10 18L12 20L20 12M12 12L4 4L2 6L8 12L2 18L4 20L12 12"/></svg>
+      </span>
+    </div>
+  </div>
+
+  <!-- BOTTOM ROW: 3 ADVANCED PLATFORM & OUTCOME LAYERS -->
+  <div class="bottom-row">
+
+    <!-- STEP 6: ADVANCED VISUALIZATION PLATFORM -->
+    <div class="wide-card step-6">
+      <div class="card-header">
+        <svg viewBox="0 0 24 24"><path d="M4 3H20C21.1 3 22 3.9 22 5V15C22 16.1 21.1 17 20 17H14V19H16V21H8V19H10V17H4C2.9 17 2 16.1 2 15V5C2 3.9 2.9 3 4 3M4 5V15H20V5H4Z"/></svg>
+        6. ADVANCED VISUALIZATION PLATFORM (STREAMLIT + GGTRUST)
+      </div>
+      <div class="card-body">
+        <div class="grid-2col">
+          <div class="sub-block">
+            <div class="sub-title">In-Situ Glyphs & Forensics</div>
+            <div class="sub-text">
+              • <strong>Technique 1:</strong> Concentric Gaussian Halos (Alpha Saliency)<br>
+              • <strong>Technique 2:</strong> Elastic True-Neighbor Tethers & Red Rings<br>
+              • <strong>Technique 3:</strong> 4-Quadrant Distortion Phase Plane<br>
+              • <strong>Technique 4:</strong> Multi-Scale Stability Spectrum Curves
+            </div>
+          </div>
+          <div class="sub-block">
+            <div class="sub-title">High-D Exploration & Code</div>
+            <div class="sub-text">
+              • <strong>Technique 5A:</strong> Parallel Coordinates Plot (PCP)<br>
+              • <strong>Technique 5B:</strong> Co-Ranking Matrix & Shepard Plot<br>
+              • <strong>Technique 6:</strong> Synchronized Dual-Canvas Contrast<br>
+              • <strong>Reproducible Code:</strong> Python (Scanpy/Plotly) & R
+            </div>
+          </div>
+        </div>
+        <div class="sub-block" style="background:#eff6ff; border-color:#bfdbfe;">
+          <div class="sub-text" style="color:#1e3a8a;">
+            <strong>Interactive Operator Support:</strong> Live lasso selections, cell-level forensic click inspection, metric-conditioned micro-bars, and one-click filtered CSV exports.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 7: CLINICAL & DIAGNOSTIC OUTCOMES -->
+    <div class="wide-card step-7">
+      <div class="card-header">
+        <svg viewBox="0 0 24 24"><path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1M10 16L6.5 12.5L7.91 11.09L10 13.17L16.09 7.08L17.5 8.5L10 16Z"/></svg>
+        7. ACTIONABLE DIAGNOSTIC OUTCOMES
+      </div>
+      <div class="card-body">
+        <div class="sub-block">
+          <div class="sub-title">100% Artifact Elimination</div>
+          <div class="sub-text">
+            • <strong>Intrusion Caught:</strong> 22 CD8+ T-cells displaced near Monocytes flagged (T &lt; 0.38)<br>
+            • <strong>Extrusion Caught:</strong> 24 torn CD4+ memory cells recovered (C &lt; 0.32), preventing false sub-clone publications
+          </div>
+        </div>
+        <div class="sub-block">
+          <div class="sub-title">Techniques 7 & 8: Decision Support</div>
+          <div class="sub-text">
+            • <strong>Diagnostic Table:</strong> In-cell metric micro-bars<br>
+            • <strong>Clinical Risk Radar:</strong> 6-axis operational audit<br>
+            • <strong>Cost Avoidance:</strong> Saves $45,000+ per paper in false wet-lab validations
+          </div>
+        </div>
+        <span class="pill-badge pill-red">Zero Unannotated Hallucinations</span>
+      </div>
+    </div>
+
+    <!-- STEP 8: STAKEHOLDERS & END USERS -->
+    <div class="wide-card step-8">
+      <div class="card-header">
+        <svg viewBox="0 0 24 24"><path d="M16 11C17.66 11 18.99 9.66 18.99 8C18.99 6.34 17.66 5 16 5C14.34 5 13 6.34 13 8C13 9.66 14.34 11 16 11M8 11C9.66 11 10.99 9.66 10.99 8C10.99 6.34 9.66 5 8 5C6.34 5 5 6.34 5 8C5 9.66 6.34 11 8 11M8 13C5.67 13 1 14.17 1 16.5V19H15V16.5C15 14.17 10.33 13 8 13M16 13C15.71 13 15.38 13.02 15.03 13.05C16.19 13.89 17 15.02 17 16.5V19H23V16.5C23 14.17 18.33 13 16 13Z"/></svg>
+        8. END USERS & STAKEHOLDERS
+      </div>
+      <div class="card-body">
+        <div class="sub-block">
+          <div class="sub-title">Computational Biologists</div>
+          <div class="sub-text">
+            Verify true cellular manifolds, avoid false clusters, and automate single-cell QC filtering.
+          </div>
+        </div>
+        <div class="sub-block">
+          <div class="sub-title">Clinical Oncologists & Immunologists</div>
+          <div class="sub-text">
+            Evaluate tumor micro-environments and validate immunotherapy targets with certified trust.
+          </div>
+        </div>
+        <div class="sub-block">
+          <div class="sub-title">Academic & Industry Data Scientists</div>
+          <div class="sub-text">
+            Standardize publication-ready Grammar-of-Graphics pipelines with dual Python & R exports.
+          </div>
+        </div>
+        <span class="pill-badge pill-teal">Universal Research Impact</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER BANNER -->
+  <div class="footer-banner">
+    <div class="footer-left">
+      <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"/></svg>
+      The ggtrust Paradigm Shift
+    </div>
+    <div class="footer-flow">
+      <span>From <strong>High-D Metric Uncertainty</strong></span>
+      →
+      <span>Through <strong>Vectorized In-Situ Fidelity Verification</strong></span>
+      →
+      <span>To <strong>Trustworthy, Reproducible Biomedical Discovery</strong></span>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
+

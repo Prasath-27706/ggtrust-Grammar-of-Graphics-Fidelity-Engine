@@ -1,0 +1,28 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# R check directories
+*.Rcheck/
+.RData
+.Rhistory
+
+venv/
+.venv/
+env/
+
+# Editor & Tool artifacts
+.mimosa/
+.zcode/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.tmp
+*~
+
+# Backups
+*BACKUP*
+*.tar.gz
+
