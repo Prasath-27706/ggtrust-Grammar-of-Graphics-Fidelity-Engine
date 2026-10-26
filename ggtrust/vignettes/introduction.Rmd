@@ -1,0 +1,195 @@
+---
+title: "Introduction to ggtrust"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to ggtrust}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6,
+  fig.height = 4
+)
+library(ggtrust)
+```
+
+## Why ggtrust?
+
+Dimensionality reduction projections (t-SNE, UMAP, PCA) are ubiquitous in data
+science, but they can be misleading. Points that appear close in the 2D scatterplot
+may be far apart in the original high-dimensional space, and vice versa. This
+mismatch is called **spatialization unreliability** -- and there is currently no
+standard way to see it.
+
+`ggtrust` adds **per-point reliability** to ggplot2 scatterplots. It computes
+trustworthiness and continuity (Venna & Kaski, 2001) for each point and renders
+them as visual encodings: **halos** (for small datasets) or a **landscape
+surface** (for large ones).
+
+## Core concept: reliability
+
+Each point $i$ gets a reliability score $R_i \in [0, 1]$ combining:
+
+- **Trustworthiness** $T(k, i)$: Do the $k$ nearest neighbors in the embedding
+  actually come from the $k$ nearest neighbors in the original space?
+- **Continuity** $C(k, i)$: Do the $k$ nearest neighbors in the original space
+  appear among the $k$ nearest in the embedding?
+
+By default, $R_i = \min(T_i, C_i)$, giving a conservative lower bound.
+
+## Two encoding modes
+
+### Halo mode (≤ 500 points)
+
+Each point is surrounded by concentric Gaussian rings. The **extent** of the halo
+flags attention (wider = less reliable), while the **opacity** at the center
+signals the reliability value directly.
+
+```{r halo-demo, fig.cap="Halo encoding: wider, more transparent halos mark unreliable points."}
+set.seed(42)
+d <- data.frame(
+  x = c(rnorm(30, -2), rnorm(30, 2)),
+  y = c(rnorm(30, -2), rnorm(30, 2)),
+  reliability = c(runif(30, 0.1, 0.5), runif(30, 0.5, 1.0))
+)
+
+ggplot(d, aes(x, y, reliability = reliability)) +
+  geom_trust_halo() +
+  theme_trust() +
+  ggtitle("Halo encoding")
+```
+
+### Landscape mode (> 500 points)
+
+Reliability values are smoothed into a continuous 2D surface using GAM
+(smooth reliability ~ s(x, y)) and rendered as a semitransparent raster with
+optional contour lines. This gives a region-level view of fidelity.
+
+```{r landscape-demo, fig.cap="Landscape encoding: a smoothed reliability surface with contour lines."}
+set.seed(123)
+n <- 800
+d <- data.frame(
+  x = rnorm(n),
+  y = rnorm(n),
+  reliability = runif(n)
+)
+
+ggplot(d, aes(x, y, reliability = reliability)) +
+  geom_trust_landscape(contours = FALSE) +
+  geom_point(size = 0.5) +
+  theme_trust() +
+  ggtitle("Landscape encoding")
+```
+
+## Quick start
+
+### With manual reliability
+
+```{r manual-usage}
+d <- data.frame(
+  x = rnorm(50),
+  y = rnorm(50),
+  reliability = runif(50)
+)
+
+ggplot(d, aes(x, y, reliability = reliability)) +
+  geom_trust_point() +
+  scale_reliability_continuous() +
+  theme_trust()
+```
+
+### With StatTrustDR (automatic)
+
+If you have the original high-dimensional data and its DR embedding, let
+`stat_trust_dr` compute reliability automatically:
+
+```{r stat-usage, eval=FALSE}
+set.seed(42)
+orig <- matrix(rnorm(300), ncol = 3)
+emb <- orig[, 1:2] + matrix(rnorm(200, sd = 0.3), ncol = 2)
+df <- data.frame(x = emb[, 1], y = emb[, 2])
+
+ggplot(df, aes(x, y)) +
+  stat_trust_dr(original_data = orig, k = 10) +
+  scale_reliability_continuous() +
+  theme_trust()
+```
+
+## Auto-encoding dispatcher
+
+`geom_trust_point()` automatically selects the appropriate encoding:
+
+- **n ≤ 500**: Halo mode
+- **n > 500**: Landscape mode
+
+Or force a specific encoding:
+
+```{r auto-usage, eval=FALSE}
+ggplot(d, aes(x, y, reliability = reliability)) +
+  geom_trust_point(encoding = "halo") +
+  theme_trust()
+```
+
+## Customization
+
+### Tuning halo appearance
+
+```{r halo-tuning, eval=FALSE}
+ggplot(d, aes(x, y, reliability = reliability)) +
+  geom_trust_halo(
+    max_radius = 0.03,
+    n_layers = 15,
+    falloff = 0.2,
+    base_intensity = 0.4
+  ) +
+  theme_trust()
+```
+
+### Tuning landscape appearance
+
+```{r landscape-tuning, eval=FALSE}
+ggplot(d, aes(x, y, reliability = reliability)) +
+  geom_trust_landscape(
+    grid_size = 150,
+    smoothing = "loess",
+    raster_alpha = 0.3,
+    contours = TRUE,
+    contour_bins = 8
+  ) +
+  theme_trust()
+```
+
+### Changing the colormap
+
+```{r colormap, eval=FALSE}
+ggplot(d, aes(x, y, reliability = reliability)) +
+  geom_trust_landscape(colourmap = "magma") +
+  theme_trust()
+```
+
+## Global defaults
+
+```{r defaults}
+# Read a default
+trust_default("halo.n_layers")
+
+# Override globally
+set_trust_default("halo.n_layers", 15L)
+trust_default("halo.n_layers")
+```
+
+## Legend and guide
+
+The `scale_reliability_continuous()` scale includes a custom legend guide
+showing a continuous gradient. The `key_glyph_trust` function provides a
+concentric-ring glyph for the legend.
+
+## References
+
+- Venna, J. & Kaski, S. (2001). Neighborhood preservation in nonlinear
+  projection methods: An experimental study. *Proceedings of ICANN*.
+- Stop Misusing t-SNE (2025). *Nature Machine Intelligence*.

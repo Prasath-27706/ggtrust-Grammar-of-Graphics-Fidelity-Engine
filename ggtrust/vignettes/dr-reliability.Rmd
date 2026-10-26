@@ -1,0 +1,157 @@
+---
+title: "DR Reliability Workflow"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{DR Reliability Workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+library(ggtrust)
+```
+
+## Overview
+
+This vignette demonstrates a complete workflow for assessing spatialization
+fidelity in dimensionality reduction scatterplots using `ggtrust`.
+
+## Step 1: Generate a DR embedding
+
+We simulate a high-dimensional dataset and apply a DR method (here, simple PCA
+projection + noise to simulate t-SNE/UMAP artifacts):
+
+```{r simulate-data}
+set.seed(42)
+
+# Original high-dimensional data (5D with structure)
+n <- 200
+orig <- rbind(
+  matrix(rnorm(n * 5, mean = -2), ncol = 5),  # Cluster 1
+  matrix(rnorm(n * 5, mean = 2), ncol = 5)     # Cluster 2
+)
+
+# "Good" embedding (preserves structure)
+good_emb <- orig[, 1:2] + matrix(rnorm(n * 2, sd = 0.2), ncol = 2)
+
+# "Noisy" embedding (destroys some neighborhood structure)
+noise <- matrix(rnorm(n * 2, sd = 1.5), ncol = 2)
+bad_emb <- orig[, 1:2] + noise
+
+df_good <- data.frame(x = good_emb[, 1], y = good_emb[, 2])
+df_bad <- data.frame(x = bad_emb[, 1], y = bad_emb[, 2])
+```
+
+## Step 2: Compute reliability with StatTrustDR
+
+```{r compute-reliability}
+p_good <- ggplot(df_good, aes(x, y)) +
+  stat_trust_dr(original_data = orig, k = 10) +
+  scale_reliability_continuous() +
+  theme_trust() +
+  ggtitle("Good embedding (low noise)")
+
+p_bad <- ggplot(df_bad, aes(x, y)) +
+  stat_trust_dr(original_data = orig, k = 10) +
+  scale_reliability_continuous() +
+  theme_trust() +
+  ggtitle("Bad embedding (high noise)")
+
+p_good
+```
+
+## Step 3: Compare encodings
+
+### Halo mode
+
+```{r compare-halo}
+p_good_halo <- ggplot(df_good, aes(x, y)) +
+  stat_trust_dr(original_data = orig, k = 10) +
+  geom_trust_halo(encoding = "halo") +
+  scale_reliability_continuous() +
+  theme_trust() +
+  ggtitle("Good embedding - Halo")
+
+p_bad_halo <- ggplot(df_bad, aes(x, y)) +
+  stat_trust_dr(original_data = orig, k = 10) +
+  geom_trust_halo(encoding = "halo") +
+  scale_reliability_continuous() +
+  theme_trust() +
+  ggtitle("Bad embedding - Halo")
+
+p_bad_halo
+```
+
+### Landscape mode
+
+```{r compare-landscape}
+p_good_land <- ggplot(df_good, aes(x, y)) +
+  stat_trust_dr(original_data = orig, k = 10) +
+  geom_trust_landscape(contours = TRUE) +
+  geom_point(size = 0.8) +
+  scale_reliability_continuous() +
+  theme_trust() +
+  ggtitle("Good embedding - Landscape")
+
+p_bad_land <- ggplot(df_bad, aes(x, y)) +
+  stat_trust_dr(original_data = orig, k = 10) +
+  geom_trust_landscape(contours = TRUE) +
+  geom_point(size = 0.8) +
+  scale_reliability_continuous() +
+  theme_trust() +
+  ggtitle("Bad embedding - Landscape")
+
+p_bad_land
+```
+
+## Step 4: Interpret the results
+
+- **Good embedding**: Most points have high reliability (R close to 1). Halos
+  are small and opaque. The landscape shows uniformly high values.
+- **Bad embedding**: Points in overlap regions have low reliability. Halos are
+  wide and transparent. The landscape shows low-value regions where the
+  embedding distorted neighborhoods.
+
+## Step 5: Fine-tune k
+
+The neighborhood size `k` controls the granularity of reliability assessment:
+
+```{r varying-k, fig.width=8, fig.height=8}
+ks <- c(5, 10, 20, 50)
+plots <- lapply(ks, function(k) {
+  ggplot(df_bad, aes(x, y)) +
+    stat_trust_dr(original_data = orig, k = k) +
+    geom_trust_halo() +
+    scale_reliability_continuous() +
+    theme_trust() +
+    ggtitle(paste("k =", k))
+})
+
+gridExtra::grid.arrange(grobs = plots, ncol = 2)
+```
+
+## Exporting reliability scores
+
+You can extract reliability scores for further analysis:
+
+```{r extract-scores}
+b <- ggplot_build(
+  ggplot(df_bad, aes(x, y)) +
+    stat_trust_dr(original_data = orig, k = 10)
+)
+
+scores <- b$data[[1]]$reliability
+summary(scores)
+```
+
+## Session info
+
+```{r session-info}
+sessionInfo()
+```

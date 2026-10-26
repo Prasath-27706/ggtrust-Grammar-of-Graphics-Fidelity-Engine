@@ -1,0 +1,31 @@
+Package: ggtrust
+Type: Package
+Title: Visualizing Point Reliability in Dimensionality Reduction Scatterplots
+Version: 0.1.0
+Authors@R: person("ADVT", "Project", email = "advt@example.org", role = c("aut", "cre"))
+Description: A grammar-of-graphics extension for ggplot2 that visualizes per-point
+    spatialization fidelity in dimension-reduction-derived scatterplots (t-SNE, UMAP,
+    PCA, MDS). Provides halo and landscape geoms for marking points whose low-dimensional
+    position is not a trustworthy reflection of their original-space neighborhood, a
+    reliability scale and guide, and statistics computing trustworthiness and continuity
+    directly from the original data.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: R (>= 4.1.0)
+Imports:
+    grid,
+    ggplot2 (>= 3.4.0),
+    mgcv,
+    scales,
+    cli
+Suggests:
+    FNN,
+    viridisLite,
+    testthat (>= 3.0.0),
+    gridExtra,
+    rmarkdown,
+    knitr
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+RoxygenNote: 7.3.2
+Roxygen: list(markdown = TRUE)
