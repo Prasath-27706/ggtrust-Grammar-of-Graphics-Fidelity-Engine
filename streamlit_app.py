@@ -1420,9 +1420,4 @@ with tabs[7]:
         *Answer:* Yes. As demonstrated in the dataset selector, the identical mathematical engine operates on computer vision features (MNIST 64-D pixels), spectrometry chemistry (Wine 13-D), and morphometrics (Iris). Any domain utilizing high-dimensional embeddings benefits directly.
         """)
 
-st.markdown("---")
-st.markdown("""
-<div style="text-align: center; color: #64748b; font-size: 0.82rem; padding: 10px 0;">
-    <strong>Advanced Data Visualization Techniques (ADVT) Project</strong> | Digital Assessment | Streamlit & ggtrust Framework
-</div>
-""", unsafe_allow_html=True)
+
